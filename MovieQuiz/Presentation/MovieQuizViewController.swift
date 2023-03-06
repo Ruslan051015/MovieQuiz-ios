@@ -1,98 +1,96 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController {
-//Аутлеты
+// MARK: - Свойства
+        private var currentQuestionIndex: Int = 0
+        private var correctAnswers: Int = 0
+//Вью модель для вопросов
+            struct QuizQuestion {
+                let image: String
+                let text: String
+                let correctAnswer: Bool
+            }
+//Вью модель для состояния "Вопрос задан"
+                struct QuizStepViewModel {
+                    let image: UIImage
+                    let question: String
+                    let questionNumber: String
+                }
+//Вью модель для состяния "Результат квиза"
+                struct QuizResultsViewModel {
+                    let title: String
+                    let text: String
+                    let buttonText: String
+                }
+// Выносим в константу вопрос с рейтингом
+        static private let question = "Рейтинг этого фильма больше чем 6?"
+//Cоздаем массив с моками
+            private let questions: [QuizQuestion] = [QuizQuestion(
+                                                        image: "The Godfather",
+                                                        text: question,
+                                                        correctAnswer: true),
+                                                     QuizQuestion(
+                                                        image: "The Dark Knight",
+                                                        text: question,
+                                                        correctAnswer: true),
+                                                     QuizQuestion(
+                                                        image: "Kill Bill",
+                                                        text: question,
+                                                        correctAnswer: true),
+                                                     QuizQuestion(
+                                                        image: "The Avengers",
+                                                        text: question,
+                                                        correctAnswer: true),
+                                                     QuizQuestion(
+                                                        image: "Deadpool",
+                                                        text: question,
+                                                        correctAnswer: true),
+                                                     QuizQuestion(
+                                                        image: "The Green Knight",
+                                                        text: question,
+                                                        correctAnswer: true),
+                                                     QuizQuestion(
+                                                        image: "Old",
+                                                        text: question,
+                                                        correctAnswer: false),
+                                                     QuizQuestion(
+                                                        image: "The Ice Age Adventures of Buck Wild",
+                                                        text: question,
+                                                        correctAnswer: false),
+                                                     QuizQuestion(
+                                                        image: "Tesla",
+                                                        text: question,
+                                                        correctAnswer: false),
+                                                     QuizQuestion(
+                                                        image: "Vivarium",
+                                                        text: question,
+                                                        correctAnswer: false)]
+// MARK: - Аутлеты
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var textLabel: UILabel!
     @IBOutlet private weak var counterLabel: UILabel!
-//Действия
-    @IBAction private func noButtonClicked(_ sender: Any) {
-        let currentQuestion = questions[currentQuestionIndex]
-        let givenAnswer = false
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
-    @IBAction private func yesButtonClicked(_ sender: Any) {
-        let currentQuestion = questions[currentQuestionIndex]
-        let givenAnswer = true
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
-//Вью модель для вопросов
-        struct QuizQuestion {
-            let image: String
-            let text: String
-            let correctAnswer: Bool
-        }
-//Вью модель для состояния "Вопрос задан"
-            struct QuizStepViewModel {
-                let image: UIImage
-                let question: String
-                let questionNumber: String
-            }
-//Вью модель для состяния "Результат квиза"
-            struct QuizResultsViewModel {
-                let title: String
-                let text: String
-                let buttonText: String
-            }
-// Выносим в константу вопрос с рейтингом
-    static private let question = "Рейтинг этого фильма больше чем 6?"
-    
-//Cоздаем массив с моками
-        private let questions: [QuizQuestion] = [QuizQuestion(
-                                                    image: "The Godfather",
-                                                    text: question,
-                                                    correctAnswer: true),
-                                                 QuizQuestion(
-                                                    image: "The Dark Knight",
-                                                    text: question,
-                                                    correctAnswer: true),
-                                                 QuizQuestion(
-                                                    image: "Kill Bill",
-                                                    text: question,
-                                                    correctAnswer: true),
-                                                 QuizQuestion(
-                                                    image: "The Avengers",
-                                                    text: question,
-                                                    correctAnswer: true),
-                                                 QuizQuestion(
-                                                    image: "Deadpool",
-                                                    text: question,
-                                                    correctAnswer: true),
-                                                 QuizQuestion(
-                                                    image: "The Green Knight",
-                                                    text: question,
-                                                    correctAnswer: true),
-                                                 QuizQuestion(
-                                                    image: "Old",
-                                                    text: question,
-                                                    correctAnswer: false),
-                                                 QuizQuestion(
-                                                    image: "The Ice Age Adventures of Buck Wild",
-                                                    text: question,
-                                                    correctAnswer: false),
-                                                 QuizQuestion(
-                                                    image: "Tesla",
-                                                    text: question,
-                                                    correctAnswer: false),
-                                                 QuizQuestion(
-                                                    image: "Vivarium",
-                                                    text: question,
-                                                    correctAnswer: false)]
-// Переменная, отвечающая за индекс текущего вопроса
-    private var currentQuestionIndex: Int = 0
-// Переменная с количеством правильных ответов
-    private var correctAnswers: Int = 0
-    
 // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         let currentQuestion = questions[currentQuestionIndex]
+        imageView.layer.cornerRadius = 20
 // Вызываем метод показа первого экрана, в аргумент закладываем первый вопрос массива
         show(quiz: convert(model: currentQuestion))
     }
-// Прописываем реализацию метода показа первого экрана
+// MARK: - Действия
+        @IBAction private func noButtonClicked(_ sender: Any) {
+            let currentQuestion = questions[currentQuestionIndex]
+            let givenAnswer = false
+            showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        }
+        @IBAction private func yesButtonClicked(_ sender: Any) {
+            let currentQuestion = questions[currentQuestionIndex]
+            let givenAnswer = true
+            showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        }
+// MARK: - Other funcs: Прописываем реализацию метода показа первого экрана
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
@@ -132,17 +130,16 @@ final class MovieQuizViewController: UIViewController {
         if isCorrect {
             correctAnswers += 1
         }
-        
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-    
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.showNextQuestionOrResult()
 //Убираем подсветку ответа после выбора варианта
             self.imageView.layer.borderColor = UIColor.clear.cgColor
         }
-        
+        noButton.isEnabled = false
+        yesButton.isEnabled = false
     }
 // Реализация функции показа следующего вопроса или результата
     private func showNextQuestionOrResult() {
@@ -159,5 +156,7 @@ final class MovieQuizViewController: UIViewController {
             let viewModel = convert(model: nextQuestion)
             show(quiz: viewModel)
         }
+        noButton.isEnabled = true
+        yesButton.isEnabled = true
     }
 }
