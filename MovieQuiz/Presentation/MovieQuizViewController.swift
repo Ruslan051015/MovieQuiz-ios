@@ -1,13 +1,13 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
     // MARK: - Свойства
     private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
     private let questionsAmount: Int = 10
     private var questionFactory: questionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
-    
+    private var alertPresenter: AlertPresenterProtocol?
     
     // MARK: - Аутлеты
     @IBOutlet private weak var noButton: UIButton!
@@ -23,6 +23,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         questionFactory = QuestionFactory(delegate: self)
         questionFactory?.requestNextQuestion()
+        
+        alertPresenter = AlertPresenter(delegate: self)
     }
     // MARK: - QuestionFactoryDelegate
     func didRecieveNextQuestion(question: QuizQuestion?) {
@@ -53,25 +55,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         counterLabel.text = step.questionNumber
     }
     // Прописываем реализацию метода показа результата квиза
-    private func show(quiz result: QuizResultsViewModel) {
-        // Создает алерт(предупреждение)
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert)
-        // Создаем кнопку с действиями
-        let action = UIAlertAction(title: result.buttonText, style: .default) { [weak self] _ in
+    private func show(quiz result: AlertModel) {
+        let alertModel = AlertModel(title: "Этот раунд окночен!", message: "Ваш результат \(correctAnswers) из 10", buttonText:"Сыграть еще раз!") { [weak self] in
             guard let self = self else { return }
             self.currentQuestionIndex = 0
-            // Сбрасываем счетчик правильных ответов на 0
             self.correctAnswers = 0
-            // Заново показываем первый вопрос
-            self.questionFactory?.requestNextQuestion()
         }
-    // Добавляем кнопку в алерт
-    alert.addAction(action)
-    // Показываем алерт
-    self.present(alert, animated: true, completion: nil)
+        alertPresenter?.show(model: alertModel)
+        
     }
 // Реализация функции конвертирования
     private func convert(model: QuizQuestion)-> QuizStepViewModel {
@@ -101,10 +92,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func showNextQuestionOrResult() {
         if currentQuestionIndex == questionsAmount - 1 {
             let text = "Ваш результат \(correctAnswers) из 10"
-            let viewModel = QuizResultsViewModel(
+            let viewModel = AlertModel(
                 title: "Этот раунд закончен",
-                text: text,
-                buttonText: "Сыграть еще раз!")
+                message: text,
+                buttonText: "Сыграть еще раз!",
+                completion:{ [weak self] in
+                guard let self = self else { return }
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0 } )
             show(quiz: viewModel)
         } else {
             currentQuestionIndex += 1
