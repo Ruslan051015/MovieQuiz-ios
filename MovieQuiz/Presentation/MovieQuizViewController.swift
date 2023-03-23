@@ -1,6 +1,7 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
+    
     // MARK: - Свойства
     private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
@@ -37,6 +38,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             self?.show(quiz: viewModel)
         }
     }
+// MARK: - AlertPresenterDelegate
+    func present(_ viewControllerToPresent: UIViewController) {
+      
+    }
     // MARK: - Действия
     @IBAction private func noButtonClicked(_ sender: Any) {
         guard let currentQuestion = currentQuestion else { return }
@@ -56,14 +61,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     }
     // Прописываем реализацию метода показа результата квиза
     private func show(quiz result: AlertModel) {
-        let alertModel = AlertModel(title: "Этот раунд окночен!", message: "Ваш результат \(correctAnswers) из 10", buttonText:"Сыграть еще раз!") { [weak self] in
-            guard let self = self else { return }
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-        }
+        let alertModel = AlertModel(title: result.title,
+                                    message: result.message,
+                                    buttonText:result.buttonText,
+                                    completion: result.completion)
         alertPresenter?.show(model: alertModel)
-        
-    }
+        }
+    
 // Реализация функции конвертирования
     private func convert(model: QuizQuestion)-> QuizStepViewModel {
        return QuizStepViewModel(
@@ -95,12 +99,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             let viewModel = AlertModel(
                 title: "Этот раунд закончен",
                 message: text,
-                buttonText: "Сыграть еще раз!",
-                completion:{ [weak self] in
-                guard let self = self else { return }
-                self.currentQuestionIndex = 0
-                self.correctAnswers = 0 } )
-            show(quiz: viewModel)
+                buttonText: "Сыграть еще раз!") { [weak self] in
+                    guard let self = self else { return }
+                    self.currentQuestionIndex = 0
+                    self.correctAnswers = 0
+                    self.questionFactory?.requestNextQuestion()
+                }
+            alertPresenter?.show(model: viewModel)
         } else {
             currentQuestionIndex += 1
             self.questionFactory?.requestNextQuestion()

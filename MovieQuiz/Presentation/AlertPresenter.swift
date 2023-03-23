@@ -13,7 +13,9 @@ class AlertPresenter: AlertPresenterProtocol {
             message: model.message,
             preferredStyle: .alert)
         // Создаем кнопку с действиями
-        let action = UIAlertAction(title: model.buttonText, style: .default) 
+        let action = UIAlertAction(title: model.buttonText, style: .default, handler: { _ in
+            model.completion?()
+        })
     // Добавляем кнопку в алерт
         alert.addAction(action)
     // Показываем алерт
