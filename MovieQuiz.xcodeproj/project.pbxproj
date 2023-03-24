@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4A2EE18D29C9D627006935EB /* AlertModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2EE18C29C9D627006935EB /* AlertModel.swift */; };
-		4A2EE18F29C9D8C3006935EB /* AlerPresenterDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2EE18E29C9D8C3006935EB /* AlerPresenterDelegate.swift */; };
 		4A2EE19129C9D8D8006935EB /* AlertPresenterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2EE19029C9D8D8006935EB /* AlertPresenterProtocol.swift */; };
 		4A2EE19329C9D939006935EB /* AlertPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A2EE19229C9D939006935EB /* AlertPresenter.swift */; };
 		4A78B79F29A949E500ED3281 /* YS Display-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4A78B79D29A9491500ED3281 /* YS Display-Bold.ttf */; };
@@ -32,7 +31,6 @@
 
 /* Begin PBXFileReference section */
 		4A2EE18C29C9D627006935EB /* AlertModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertModel.swift; sourceTree = "<group>"; };
-		4A2EE18E29C9D8C3006935EB /* AlerPresenterDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlerPresenterDelegate.swift; sourceTree = "<group>"; };
 		4A2EE19029C9D8D8006935EB /* AlertPresenterProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPresenterProtocol.swift; sourceTree = "<group>"; };
 		4A2EE19229C9D939006935EB /* AlertPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertPresenter.swift; sourceTree = "<group>"; };
 		4A78B79D29A9491500ED3281 /* YS Display-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "YS Display-Bold.ttf"; sourceTree = "<group>"; };
@@ -90,7 +88,6 @@
 				4ABFF39A29C48852008B8249 /* QuestionFactory.swift */,
 				4AA7538329C718B0005ED377 /* QuestionFactoryProtocol.swift */,
 				4AE5B88F29C8B43D00CFAECF /* QuestionFactoryDelegate.swift */,
-				4A2EE18E29C9D8C3006935EB /* AlerPresenterDelegate.swift */,
 				4A2EE19029C9D8D8006935EB /* AlertPresenterProtocol.swift */,
 			);
 			path = Services;
@@ -243,7 +240,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AD5EE5DE284D7887003966EF /* UIColor+Extensions.swift in Sources */,
-				4A2EE18F29C9D8C3006935EB /* AlerPresenterDelegate.swift in Sources */,
 				4A2EE18D29C9D627006935EB /* AlertModel.swift in Sources */,
 				AD7AFA552836189F00399704 /* Array+Extensions.swift in Sources */,
 				4A2EE19129C9D8D8006935EB /* AlertPresenterProtocol.swift in Sources */,

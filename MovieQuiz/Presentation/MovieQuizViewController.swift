@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Свойства
     private var currentQuestionIndex: Int = 0
@@ -26,6 +26,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         questionFactory?.requestNextQuestion()
         
         alertPresenter = AlertPresenter(delegate: self)
+        
     }
     // MARK: - QuestionFactoryDelegate
     func didRecieveNextQuestion(question: QuizQuestion?) {
@@ -37,10 +38,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
         }
-    }
-// MARK: - AlertPresenterDelegate
-    func present(_ viewControllerToPresent: UIViewController) {
-      
     }
     // MARK: - Действия
     @IBAction private func noButtonClicked(_ sender: Any) {
@@ -97,7 +94,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         if currentQuestionIndex == questionsAmount - 1 {
             let text = "Ваш результат \(correctAnswers) из 10"
             let viewModel = AlertModel(
-                title: "Этот раунд закончен",
+                title: "Этот раунд окончен!",
                 message: text,
                 buttonText: "Сыграть еще раз!") { [weak self] in
                     guard let self = self else { return }
