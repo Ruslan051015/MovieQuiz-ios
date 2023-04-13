@@ -9,6 +9,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: questionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenterProtocol?
+    private var statisticService: StatisticService?
     
     // MARK: - Аутлеты
     @IBOutlet private weak var noButton: UIButton!
@@ -19,14 +20,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+    
         imageView.layer.cornerRadius = 20
         
         questionFactory = QuestionFactory(delegate: self)
         questionFactory?.requestNextQuestion()
-        
         alertPresenter = AlertPresenter(delegate: self)
-        
+        statisticService = StatisticServiceImplementation()
     }
     // MARK: - QuestionFactoryDelegate
     func didRecieveNextQuestion(question: QuizQuestion?) {
@@ -56,14 +56,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
     }
-    // Прописываем реализацию метода показа результата квиза
+    /* Прописываем реализацию метода показа результата квиза
     private func show(quiz result: AlertModel) {
         let alertModel = AlertModel(title: result.title,
                                     message: result.message,
                                     buttonText:result.buttonText,
                                     completion: result.completion)
         alertPresenter?.show(model: alertModel)
-        }
+        }*/
     
 // Реализация функции конвертирования
     private func convert(model: QuizQuestion)-> QuizStepViewModel {
@@ -92,10 +92,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 // Реализация функции показа следующего вопроса или результата
     private func showNextQuestionOrResult() {
         if currentQuestionIndex == questionsAmount - 1 {
-            let text = "Ваш результат \(correctAnswers) из 10"
+            statisticService?.store(correct: correctAnswers, total: questionsAmount)
             let viewModel = AlertModel(
                 title: "Этот раунд окончен!",
-                message: text,
+                message: createAlertMessage(),
                 buttonText: "Сыграть еще раз!") { [weak self] in
                     guard let self = self else { return }
                     self.currentQuestionIndex = 0
@@ -110,5 +110,22 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.isEnabled = true
         yesButton.isEnabled = true
     }
+    
+// Реализациф функции формирования сообщения
+    private func createAlertMessage() -> String {
+        guard let statisticService = statisticService,
+              let bestGame = statisticService.bestGame else {
+            assertionFailure("Нет сохраненных данных")
+            return ""
+        }
+        let totalGamesCountLine = "Количество сыгранных квизов: \(statisticService.gamesCount)"
+        let currentGameResultLine = "Ваш результат: \(correctAnswers)\\\(questionsAmount)"
+        let bestGameInfoLine = "Рекорд: \(bestGame.correct)\\\(bestGame.total)"
+        + " (\(bestGame.date.dateTimeString))"
+        let averageAccuracyLine = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+        let resultMessage = [currentGameResultLine, totalGamesCountLine, bestGameInfoLine, averageAccuracyLine].joined(separator: "\n")
+        return resultMessage
+    }
 }
+
 
