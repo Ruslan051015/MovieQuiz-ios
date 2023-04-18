@@ -17,6 +17,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var textLabel: UILabel!
     @IBOutlet private weak var counterLabel: UILabel!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,14 +66,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         alertPresenter?.show(model: alertModel)
         }*/
     
-// Реализация функции конвертирования
+    // Реализация функции конвертирования
     private func convert(model: QuizQuestion)-> QuizStepViewModel {
        return QuizStepViewModel(
         image: UIImage(named: model.image) ?? UIImage(), //Распаковываем картинку
         question: model.text, // Берем текст вопроса
         questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
-// Реализация функции показа результата после ответа на вопрос
+    // Реализация функции показа результата после ответа на вопрос
     private func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
             correctAnswers += 1
@@ -83,13 +84,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self = self else { return }
             self.showNextQuestionOrResult()
-//Убираем подсветку ответа после выбора варианта
+    //Убираем подсветку ответа после выбора варианта
             self.imageView.layer.borderColor = UIColor.clear.cgColor
         }
         noButton.isEnabled = false
         yesButton.isEnabled = false
     }
-// Реализация функции показа следующего вопроса или результата
+    // Реализация функции показа следующего вопроса или результата
     private func showNextQuestionOrResult() {
         if currentQuestionIndex == questionsAmount - 1 {
             statisticService?.store(correct: correctAnswers, total: questionsAmount)
@@ -111,7 +112,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         yesButton.isEnabled = true
     }
     
-// Реализациф функции формирования сообщения
+    // Реализациф функции формирования сообщения
     private func createAlertMessage() -> String {
         guard let statisticService = statisticService,
               let bestGame = statisticService.bestGame else {
@@ -126,6 +127,28 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let resultMessage = [currentGameResultLine, totalGamesCountLine, bestGameInfoLine, averageAccuracyLine].joined(separator: "\n")
         return resultMessage
     }
+    // Реализация функции показа индикатора загрузки
+    private func showLoadinfIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    // Реализация функции скрытия индикатора загрузки
+    private func hideLoadinfIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
+    }
+    // Cоздаем функции показа ошибки с алертом
+    private func showNetworkError(message: String) {
+        hideLoadinfIndicator()
+        let errorModel = AlertModel(
+            title: "Ошибка",
+            message: "Не удалось загрузить данные",
+            buttonText: "Поробовать еще раз!") { [weak self] in
+                guard let self = self else { return }
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                self.questionFactory?.requestNextQuestion()
+            }
+        alertPresenter?.show(model: errorModel)
+    }
 }
-
-
