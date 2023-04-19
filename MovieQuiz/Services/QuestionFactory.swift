@@ -79,10 +79,10 @@ class QuestionFactory: questionFactoryProtocol {
             do {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
-                print("Не удалость загрузить изображение")
-            }
+                       print("Не удалость загрузить изображение")
+                }
             //Не обязательная часть задания про разный рейтинг в вопросе
-            let ratingArray = [3, 5, 7, 9]
+            let ratingArray = [8.2, 8.5, 8.7, 9]
             let randomRating = ratingArray.randomElement()!
             let rating = Float(movie.rating) ?? 0
             let text = "Рейтинг этого фильма больше чем \(randomRating)"

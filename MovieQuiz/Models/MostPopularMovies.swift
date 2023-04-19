@@ -1,6 +1,6 @@
 import Foundation
 struct MostPopularMovies: Codable {
-    let errorMessgae: String
+    let errorMessage: String
     let items: [MostPopularMovie]
 }
 
