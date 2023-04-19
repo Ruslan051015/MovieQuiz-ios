@@ -24,8 +24,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
         imageView.layer.cornerRadius = 20
         
-        questionFactory = QuestionFactory(delegate: self)
-        questionFactory?.requestNextQuestion()
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        showLoadinfIndicator()
         alertPresenter = AlertPresenter(delegate: self)
         statisticService = StatisticServiceImplementation()
     }
@@ -69,7 +70,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // Реализация функции конвертирования
     private func convert(model: QuizQuestion)-> QuizStepViewModel {
        return QuizStepViewModel(
-        image: UIImage(named: model.image) ?? UIImage(), //Распаковываем картинку
+        image: UIImage(data: model.image) ?? UIImage(), //Распаковываем картинку
         question: model.text, // Берем текст вопроса
         questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
@@ -112,7 +113,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         yesButton.isEnabled = true
     }
     
-    // Реализациф функции формирования сообщения
+    // Реализация функции формирования сообщения
     private func createAlertMessage() -> String {
         guard let statisticService = statisticService,
               let bestGame = statisticService.bestGame else {
@@ -147,8 +148,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                 guard let self = self else { return }
                 self.currentQuestionIndex = 0
                 self.correctAnswers = 0
-                self.questionFactory?.requestNextQuestion()
+                self.questionFactory?.loadData() //requestNextQuestion()
             }
         alertPresenter?.show(model: errorModel)
+    }
+    // Реализация метода успешности загрузки данных с сервера
+    func didLoadDataFromServer() {
+        hideLoadinfIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    // Реализация метода ошибки загрузки данных с сервера
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
     }
 }
