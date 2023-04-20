@@ -6,11 +6,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
     private let questionsAmount: Int = 10
-    private var questionFactory: questionFactoryProtocol?
+    private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenterProtocol?
     private var statisticService: StatisticService?
-    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+            return .lightContent
+        }
     // MARK: - Аутлеты
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
@@ -26,7 +28,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
-        showLoadinfIndicator()
+        showLoadingIndicator()
         alertPresenter = AlertPresenter(delegate: self)
         statisticService = StatisticServiceImplementation()
     }
@@ -129,18 +131,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         return resultMessage
     }
     // Реализация функции показа индикатора загрузки
-    private func showLoadinfIndicator() {
+    private func showLoadingIndicator() {
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     // Реализация функции скрытия индикатора загрузки
-    private func hideLoadinfIndicator() {
+    private func hideLoadingIndicator() {
         activityIndicator.isHidden = true
         activityIndicator.stopAnimating()
     }
     // Cоздаем функции показа ошибки с алертом
     private func showNetworkError(message: String) {
-        hideLoadinfIndicator()
+        hideLoadingIndicator()
         let errorModel = AlertModel(
             title: "Ошибка",
             message: "Не удалось загрузить данные",
@@ -154,7 +156,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     // Реализация метода успешности загрузки данных с сервера
     func didLoadDataFromServer() {
-        hideLoadinfIndicator()
+        hideLoadingIndicator()
         questionFactory?.requestNextQuestion()
     }
     // Реализация метода ошибки загрузки данных с сервера

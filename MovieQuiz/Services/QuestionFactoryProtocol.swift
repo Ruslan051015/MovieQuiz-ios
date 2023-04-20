@@ -1,6 +1,6 @@
 import Foundation
 
-protocol questionFactoryProtocol {
+protocol QuestionFactoryProtocol {
     func requestNextQuestion()
     func loadData()
 }
