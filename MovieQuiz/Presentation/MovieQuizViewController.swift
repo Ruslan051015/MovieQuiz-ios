@@ -11,8 +11,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var alertPresenter: AlertPresenterProtocol?
     private var statisticService: StatisticService?
     override var preferredStatusBarStyle: UIStatusBarStyle {
-            return .lightContent
-        }
+        return .lightContent
+    }
     // MARK: - Аутлеты
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
@@ -23,7 +23,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-    
+        
         imageView.layer.cornerRadius = 20
         
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
@@ -61,20 +61,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         counterLabel.text = step.questionNumber
     }
     /* Прописываем реализацию метода показа результата квиза
-    private func show(quiz result: AlertModel) {
-        let alertModel = AlertModel(title: result.title,
-                                    message: result.message,
-                                    buttonText:result.buttonText,
-                                    completion: result.completion)
-        alertPresenter?.show(model: alertModel)
-        }*/
+     private func show(quiz result: AlertModel) {
+     let alertModel = AlertModel(title: result.title,
+     message: result.message,
+     buttonText:result.buttonText,
+     completion: result.completion)
+     alertPresenter?.show(model: alertModel)
+     }*/
     
     // Реализация функции конвертирования
     private func convert(model: QuizQuestion)-> QuizStepViewModel {
-       return QuizStepViewModel(
-        image: UIImage(data: model.image) ?? UIImage(), //Распаковываем картинку
-        question: model.text, // Берем текст вопроса
-        questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+        return QuizStepViewModel(
+            image: UIImage(data: model.image) ?? UIImage(), //Распаковываем картинку
+            question: model.text, // Берем текст вопроса
+            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
     }
     // Реализация функции показа результата после ответа на вопрос
     private func showAnswerResult(isCorrect: Bool) {
@@ -87,7 +87,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self = self else { return }
             self.showNextQuestionOrResult()
-    //Убираем подсветку ответа после выбора варианта
+            //Убираем подсветку ответа после выбора варианта
             self.imageView.layer.borderColor = UIColor.clear.cgColor
         }
         noButton.isEnabled = false
@@ -110,7 +110,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         } else {
             currentQuestionIndex += 1
             self.questionFactory?.requestNextQuestion()
-            }
+        }
         noButton.isEnabled = true
         yesButton.isEnabled = true
     }
