@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 
 final class AlertPresenter: AlertPresenterProtocol {
-   private  weak var delegate: UIViewController?
+    private  weak var delegate: UIViewController?
     init(delegate:UIViewController?) {
         self.delegate = delegate
     }
@@ -13,12 +13,14 @@ final class AlertPresenter: AlertPresenterProtocol {
             message: model.message,
             preferredStyle: .alert)
         // Создаем кнопку с действиями
-        let action = UIAlertAction(title: model.buttonText, style: .default, handler: { _ in
+        let action = UIAlertAction(title: model.buttonText, style: .default){ _ in
             model.completion?()
-        })
-    // Добавляем кнопку в алерт
+        }
+        // Присваиваем accessibility Identifier
+        alert.view.accessibilityIdentifier = "GameResults"
+        // Добавляем кнопку в алерт
         alert.addAction(action)
-    // Показываем алерт
+        // Показываем алерт
         delegate?.present(alert, animated: true)
-            }
+    }
 }
