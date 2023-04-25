@@ -81,7 +81,7 @@ class QuestionFactory: QuestionFactoryProtocol {
                 print("Не удалость загрузить изображение")
             }
             //Не обязательная часть задания про разный рейтинг в вопросе
-            let ratingArray = [8.2, 8.5, 8.7, 9]
+            let ratingArray = [8.1, 8.3, 8.5, 8.7]
             let randomRating = ratingArray.randomElement() ?? 8.2
             let rating = Float(movie.rating) ?? 0
             let text = "Рейтинг этого фильма больше чем \(randomRating)?"

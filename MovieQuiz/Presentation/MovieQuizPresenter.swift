@@ -3,9 +3,23 @@ import UIKit
 
 final class MovieQuizPresenter {
     // MARK: - Свойства
-    private var currentQuestionIndex: Int = 0
+    var currentQuestion: QuizQuestion?
     let questionsAmount: Int = 10
+    private var currentQuestionIndex: Int = 0
+    weak var viewController: MovieQuizViewController?
     
+    
+    // MARK: - Действия
+    func noButtonClicked() {
+        guard let currentQuestion = currentQuestion else { return }
+        let givenAnswer = false
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
+    func yesButtonClicked() {
+        guard let currentQuestion = currentQuestion else { return }
+        let givenAnswer = true
+        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+    }
     // MARK: - Методы
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
