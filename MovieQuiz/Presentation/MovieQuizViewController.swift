@@ -3,9 +3,8 @@ import UIKit
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Свойства
-    private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
-    private let questionsAmount: Int = 10
+    private let presenter = MovieQuizPresenter()
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenterProtocol?
@@ -38,7 +37,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             return
         }
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
         }
@@ -60,22 +59,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
     }
-    /* Прописываем реализацию метода показа результата квиза
-     private func show(quiz result: AlertModel) {
-     let alertModel = AlertModel(title: result.title,
-     message: result.message,
-     buttonText:result.buttonText,
-     completion: result.completion)
-     alertPresenter?.show(model: alertModel)
-     }*/
     
-    // Реализация функции конвертирования
-    private func convert(model: QuizQuestion)-> QuizStepViewModel {
-        return QuizStepViewModel(
-            image: UIImage(data: model.image) ?? UIImage(), //Распаковываем картинку
-            question: model.text, // Берем текст вопроса
-            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-    }
     // Реализация функции показа результата после ответа на вопрос
     private func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
@@ -95,20 +79,21 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     // Реализация функции показа следующего вопроса или результата
     private func showNextQuestionOrResult() {
-        if currentQuestionIndex == questionsAmount - 1 {
-            statisticService?.store(correct: correctAnswers, total: questionsAmount)
+        if presenter.isLastQuestion() {
+            statisticService?.store(correct: correctAnswers,
+                                    total: presenter.questionsAmount)
             let viewModel = AlertModel(
                 title: "Этот раунд окончен!",
                 message: createAlertMessage(),
                 buttonText: "Сыграть еще раз!") { [weak self] in
                     guard let self = self else { return }
-                    self.currentQuestionIndex = 0
+                    presenter.resetQuestionIndex()
                     self.correctAnswers = 0
                     self.questionFactory?.requestNextQuestion()
                 }
             alertPresenter?.show(model: viewModel)
         } else {
-            currentQuestionIndex += 1
+            presenter.switchToNextQuestion()
             self.questionFactory?.requestNextQuestion()
         }
         noButton.isEnabled = true
@@ -123,7 +108,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             return ""
         }
         let totalGamesCountLine = "Количество сыгранных квизов: \(statisticService.gamesCount)"
-        let currentGameResultLine = "Ваш результат: \(correctAnswers)/\(questionsAmount)"
+        let currentGameResultLine = "Ваш результат: \(correctAnswers)/\(presenter.questionsAmount)"
         let bestGameInfoLine = "Рекорд: \(bestGame.correct)/\(bestGame.total)"
         + " (\(bestGame.date.dateTimeString))"
         let averageAccuracyLine = "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
@@ -148,7 +133,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             message: "Не удалось загрузить данные",
             buttonText: "Поробовать еще раз!") { [weak self] in
                 guard let self = self else { return }
-                self.currentQuestionIndex = 0
+                presenter.resetQuestionIndex()
                 self.correctAnswers = 0
                 self.questionFactory?.loadData() //requestNextQuestion()
             }
