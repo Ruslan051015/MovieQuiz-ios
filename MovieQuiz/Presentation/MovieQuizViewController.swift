@@ -3,7 +3,6 @@ import UIKit
 final class MovieQuizViewController: UIViewController {
     
     // MARK: - Свойства
-    var alertPresenter: AlertPresenterProtocol?
     private var presenter: MovieQuizPresenter!
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -21,7 +20,6 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.cornerRadius = 20
         
         showLoadingIndicator()
-        alertPresenter = AlertPresenter(delegate: self)
         presenter = MovieQuizPresenter(viewController: self)
     }
     
@@ -32,7 +30,7 @@ final class MovieQuizViewController: UIViewController {
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
         presenter.yesButtonClicked()
     }
-    // MARK: - Other funcs: Прописываем реализацию метода показа первого экрана
+    // MARK: - Functions
     func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
@@ -47,18 +45,6 @@ final class MovieQuizViewController: UIViewController {
     func hideLoadingIndicator() {
         activityIndicator.isHidden = true
         activityIndicator.stopAnimating()
-    }
-    // Cоздаем функции показа ошибки с алертом
-    func showNetworkError(message: String) {
-        hideLoadingIndicator()
-        let errorModel = AlertModel(
-            title: "Ошибка",
-            message: "Не удалось загрузить данные",
-            buttonText: "Поробовать еще раз!") { [weak self] in
-                guard let self = self else { return }
-                self.presenter.restartGame()
-            }
-        alertPresenter?.show(model: errorModel)
     }
     
     // Методы включения и выключения кнопок

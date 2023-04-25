@@ -7,6 +7,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     var questionFactory: QuestionFactoryProtocol?
     var currentQuestion: QuizQuestion?
     let questionsAmount: Int = 10
+    private var alertPresenter: AlertPresenterProtocol?
     private let statisticService: StatisticService!
     private var currentQuestionIndex: Int = 0
     private weak var viewController: MovieQuizViewController?
@@ -16,6 +17,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         statisticService = StatisticServiceImplementation()
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
+        alertPresenter = AlertPresenter(delegate: viewController)
         viewController.showLoadingIndicator()
     }
     // MARK: - QuestionFactoryDelegate
@@ -26,7 +28,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     func didFailToLoadData(with error: Error) {
         let message = error.localizedDescription
-        viewController?.showNetworkError(message: message)
+        showNetworkError(message: message)
     }
     func didRecieveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
@@ -85,7 +87,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
                     guard let self = self else { return }
                     self.restartGame()
                 }
-            self.viewController?.alertPresenter?.show(model: viewModel)
+            alertPresenter?.show(model: viewModel)
         } else {
             self.switchToNextQuestion()
             self.questionFactory?.requestNextQuestion()
@@ -107,6 +109,20 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         let resultMessage = [currentGameResultLine, totalGamesCountLine, bestGameInfoLine, averageAccuracyLine].joined(separator: "\n")
         return resultMessage
     }
+    
+    // Cоздаем функции показа ошибки с алертом
+    func showNetworkError(message: String) {
+        viewController?.hideLoadingIndicator()
+        let errorModel = AlertModel(
+            title: "Ошибка",
+            message: "Не удалось загрузить данные",
+            buttonText: "Поробовать еще раз!") { [weak self] in
+                guard let self = self else { return }
+                restartGame()
+            }
+        alertPresenter?.show(model: errorModel)
+    }
+    
     // Выносим логику изменения свойств в функции
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
