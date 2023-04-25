@@ -1,11 +1,9 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController {
     
     // MARK: - Свойства
-    private var correctAnswers: Int = 0
-    private let presenter = MovieQuizPresenter()
-    private var questionFactory: QuestionFactoryProtocol?
+    private var presenter: MovieQuizPresenter!
     var alertPresenter: AlertPresenterProtocol?
     private var statisticService: StatisticService?
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -21,15 +19,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         imageView.layer.cornerRadius = 20
         
-        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
-        questionFactory?.loadData()
         showLoadingIndicator()
         alertPresenter = AlertPresenter(delegate: self)
         statisticService = StatisticServiceImplementation()
-        presenter.viewController = self
+        presenter = MovieQuizPresenter(viewController: self)
     }
     // MARK: - QuestionFactoryDelegate
     func didRecieveNextQuestion(question: QuizQuestion?) {
@@ -43,24 +38,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         presenter.yesButtonClicked()
     }
     // MARK: - Other funcs: Прописываем реализацию метода показа первого экрана
-     func show(quiz step: QuizStepViewModel) {
+    func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
     }
     
     // Реализация функции показа результата после ответа на вопрос
-     func showAnswerResult(isCorrect: Bool) {
-        if isCorrect {
-            correctAnswers += 1
-        }
+    func showAnswerResult(isCorrect: Bool) {
+        presenter.didAnswer(isCorrectAnswer: isCorrect)
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             guard let self = self else { return }
-            self.presenter.correctAnswers = self.correctAnswers
-            self.presenter.questionFactory = self.questionFactory
             self.presenter.showNextQuestionOrResult()
             //Убираем подсветку ответа после выбора варианта
             self.imageView.layer.borderColor = UIColor.clear.cgColor
@@ -69,38 +60,28 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // Реализация функции показа индикатора загрузки
-    private func showLoadingIndicator() {
+    func showLoadingIndicator() {
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     // Реализация функции скрытия индикатора загрузки
-    private func hideLoadingIndicator() {
+    func hideLoadingIndicator() {
         activityIndicator.isHidden = true
         activityIndicator.stopAnimating()
     }
     // Cоздаем функции показа ошибки с алертом
-    private func showNetworkError(message: String) {
+    func showNetworkError(message: String) {
         hideLoadingIndicator()
         let errorModel = AlertModel(
             title: "Ошибка",
             message: "Не удалось загрузить данные",
             buttonText: "Поробовать еще раз!") { [weak self] in
                 guard let self = self else { return }
-                presenter.resetQuestionIndex()
-                self.correctAnswers = 0
-                self.questionFactory?.loadData() //requestNextQuestion()
+                self.presenter.restartGame()
             }
         alertPresenter?.show(model: errorModel)
     }
-    // Реализация метода успешности загрузки данных с сервера
-    func didLoadDataFromServer() {
-        hideLoadingIndicator()
-        questionFactory?.requestNextQuestion()
-    }
-    // Реализация метода ошибки загрузки данных с сервера
-    func didFailToLoadData(with error: Error) {
-        showNetworkError(message: error.localizedDescription)
-    }
+    
     // Методы включения и выключения кнопок
     func disableButtons() {
         yesButton.isEnabled = false

@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-final class MovieQuizPresenter {
+final class MovieQuizPresenter: QuestionFactoryDelegate {
     // MARK: - Свойства
     var correctAnswers: Int = 0
     var questionFactory: QuestionFactoryProtocol?
@@ -9,9 +9,34 @@ final class MovieQuizPresenter {
     var currentQuestion: QuizQuestion?
     let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
-    weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewController?
     
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        viewController.showLoadingIndicator()
+    }
+    // MARK: - QuestionFactoryDelegate
+    func didLoadDataFromServer() {
+        viewController?.hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
     
+    func didFailToLoadData(with error: Error) {
+        let message = error.localizedDescription
+        viewController?.showNetworkError(message: message)
+    }
+    func didRecieveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+        }
+    }
     // MARK: - Действия
     func noButtonClicked() {
         didAnswer(isYes: false)
@@ -28,20 +53,15 @@ final class MovieQuizPresenter {
         
         viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
-    // MARK: - QuestionFactoryDelegate
-    func didRecieveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else {
-            return
-        }
-        currentQuestion = question
-        let viewModel = convert(model: question)
-        DispatchQueue.main.async { [weak self] in
-            self?.viewController?.show(quiz: viewModel)
+    func didAnswer(isCorrectAnswer: Bool) {
+        if isCorrectAnswer {
+            correctAnswers += 1
         }
     }
+   
     // Реализация функции показа следующего вопроса или результата
-     func showNextQuestionOrResult() {
-         if self.isLastQuestion() {
+    func showNextQuestionOrResult() {
+        if self.isLastQuestion() {
             statisticService?.store(correct: correctAnswers,
                                     total: questionsAmount)
             let viewModel = AlertModel(
@@ -49,16 +69,14 @@ final class MovieQuizPresenter {
                 message: createAlertMessage(),
                 buttonText: "Сыграть еще раз!") { [weak self] in
                     guard let self = self else { return }
-                    self.resetQuestionIndex()
-                    self.correctAnswers = 0
-                    self.questionFactory?.requestNextQuestion()
+                    self.restartGame()
                 }
-             self.viewController?.alertPresenter?.show(model: viewModel)
+            self.viewController?.alertPresenter?.show(model: viewModel)
         } else {
             self.switchToNextQuestion()
             self.questionFactory?.requestNextQuestion()
         }
-         self.viewController?.enableButtons()
+        self.viewController?.enableButtons()
     }
     // Реализация функции формирования сообщения
     private func createAlertMessage() -> String {
@@ -80,8 +98,10 @@ final class MovieQuizPresenter {
         currentQuestionIndex == questionsAmount - 1
     }
     
-    func resetQuestionIndex() {
+    func restartGame() {
         currentQuestionIndex = 0
+        correctAnswers = 0
+        questionFactory?.requestNextQuestion()
     }
     
     func switchToNextQuestion() {
