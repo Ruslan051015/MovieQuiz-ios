@@ -3,9 +3,8 @@ import UIKit
 final class MovieQuizViewController: UIViewController {
     
     // MARK: - Свойства
-    private var presenter: MovieQuizPresenter!
     var alertPresenter: AlertPresenterProtocol?
-    private var statisticService: StatisticService?
+    private var presenter: MovieQuizPresenter!
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
@@ -23,13 +22,9 @@ final class MovieQuizViewController: UIViewController {
         
         showLoadingIndicator()
         alertPresenter = AlertPresenter(delegate: self)
-        statisticService = StatisticServiceImplementation()
         presenter = MovieQuizPresenter(viewController: self)
     }
-    // MARK: - QuestionFactoryDelegate
-    func didRecieveNextQuestion(question: QuizQuestion?) {
-        presenter.didRecieveNextQuestion(question: question)
-    }
+    
     // MARK: - Действия
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         presenter.noButtonClicked()
@@ -43,22 +38,6 @@ final class MovieQuizViewController: UIViewController {
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
     }
-    
-    // Реализация функции показа результата после ответа на вопрос
-    func showAnswerResult(isCorrect: Bool) {
-        presenter.didAnswer(isCorrectAnswer: isCorrect)
-        imageView.layer.masksToBounds = true
-        imageView.layer.borderWidth = 8
-        imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-            guard let self = self else { return }
-            self.presenter.showNextQuestionOrResult()
-            //Убираем подсветку ответа после выбора варианта
-            self.imageView.layer.borderColor = UIColor.clear.cgColor
-        }
-        disableButtons()
-    }
-    
     // Реализация функции показа индикатора загрузки
     func showLoadingIndicator() {
         activityIndicator.isHidden = false
@@ -90,5 +69,15 @@ final class MovieQuizViewController: UIViewController {
     func enableButtons() {
         yesButton.isEnabled = true
         noButton.isEnabled = true
+    }
+    // Метод подсветки изображения при ответе
+    func highlightImageBorder(isCorrectAnswer: Bool) {
+        imageView.layer.masksToBounds = true
+        imageView.layer.borderWidth = 8
+        imageView.layer.borderColor = isCorrectAnswer ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+    }
+    // Метод отключения подсветки после ответа
+    func doNotHighLightImageBorder() {
+        imageView.layer.borderColor = UIColor.clear.cgColor
     }
 }

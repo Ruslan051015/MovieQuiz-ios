@@ -5,14 +5,15 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     // MARK: - Свойства
     var correctAnswers: Int = 0
     var questionFactory: QuestionFactoryProtocol?
-    private var statisticService: StatisticService?
     var currentQuestion: QuizQuestion?
     let questionsAmount: Int = 10
+    private let statisticService: StatisticService!
     private var currentQuestionIndex: Int = 0
     private weak var viewController: MovieQuizViewController?
     
     init(viewController: MovieQuizViewController) {
         self.viewController = viewController
+        statisticService = StatisticServiceImplementation()
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
         viewController.showLoadingIndicator()
@@ -51,16 +52,29 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         
         let givenAnswer = isYes
         
-        viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
+        proceedWithAnswer(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
+    
     func didAnswer(isCorrectAnswer: Bool) {
         if isCorrectAnswer {
             correctAnswers += 1
         }
     }
-   
+    // Реализация функции показа результата после ответа на вопрос
+    func proceedWithAnswer(isCorrect: Bool) {
+        didAnswer(isCorrectAnswer: isCorrect)
+        viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            guard let self = self else { return }
+            self.proceedToNextQuestionOrResults()
+            //Убираем подсветку ответа после выбора варианта
+            viewController?.doNotHighLightImageBorder()
+        }
+        viewController?.disableButtons()
+    }
     // Реализация функции показа следующего вопроса или результата
-    func showNextQuestionOrResult() {
+    func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             statisticService?.store(correct: correctAnswers,
                                     total: questionsAmount)
