@@ -78,6 +78,7 @@ class QuestionFactory: QuestionFactoryProtocol {
             do {
                 imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
+                delegate?.didFailToLoadData(with: error)
                 print("Не удалость загрузить изображение")
             }
             //Не обязательная часть задания про разный рейтинг в вопросе

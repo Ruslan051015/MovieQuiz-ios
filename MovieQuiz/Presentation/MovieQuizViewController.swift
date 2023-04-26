@@ -1,9 +1,9 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     
     // MARK: - Свойства
-    private var presenter: MovieQuizPresenter!
+    private var presenter: MovieQuizPresenterProtocol?
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
@@ -25,10 +25,10 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Действия
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        presenter.noButtonClicked()
+        presenter?.noButtonClicked()
     }
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        presenter.yesButtonClicked()
+        presenter?.yesButtonClicked()
     }
     // MARK: - Functions
     func show(quiz step: QuizStepViewModel) {

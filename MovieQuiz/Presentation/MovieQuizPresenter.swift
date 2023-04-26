@@ -1,18 +1,18 @@
 import Foundation
 import UIKit
 
-final class MovieQuizPresenter: QuestionFactoryDelegate {
+final class MovieQuizPresenter: QuestionFactoryDelegate, MovieQuizPresenterProtocol {
     // MARK: - Свойства
-    var correctAnswers: Int = 0
-    var questionFactory: QuestionFactoryProtocol?
-    var currentQuestion: QuizQuestion?
-    let questionsAmount: Int = 10
+    private var correctAnswers: Int = 0
+    private var questionFactory: QuestionFactoryProtocol?
+    private var currentQuestion: QuizQuestion?
+    private let questionsAmount: Int = 10
     private var alertPresenter: AlertPresenterProtocol?
     private let statisticService: StatisticService!
     private var currentQuestionIndex: Int = 0
-    private weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
     
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         statisticService = StatisticServiceImplementation()
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
@@ -63,7 +63,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         }
     }
     // Реализация функции показа результата после ответа на вопрос
-    func proceedWithAnswer(isCorrect: Bool) {
+    private func proceedWithAnswer(isCorrect: Bool) {
         didAnswer(isCorrectAnswer: isCorrect)
         viewController?.highlightImageBorder(isCorrectAnswer: isCorrect)
         
@@ -76,7 +76,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         viewController?.disableButtons()
     }
     // Реализация функции показа следующего вопроса или результата
-    func proceedToNextQuestionOrResults() {
+   private func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
             statisticService?.store(correct: correctAnswers,
                                     total: questionsAmount)
@@ -118,7 +118,9 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             message: "Не удалось загрузить данные",
             buttonText: "Поробовать еще раз!") { [weak self] in
                 guard let self = self else { return }
-                restartGame()
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                self.questionFactory?.loadData()
             }
         alertPresenter?.show(model: errorModel)
     }
