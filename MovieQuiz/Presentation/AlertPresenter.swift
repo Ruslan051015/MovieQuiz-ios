@@ -1,12 +1,8 @@
 import Foundation
 import UIKit
 
-final class AlertPresenter: AlertPresenterProtocol {
-    private  weak var delegate: UIViewController?
-    init(delegate:UIViewController?) {
-        self.delegate = delegate
-    }
-    func show(model: AlertModel) {
+final class AlertPresenter {
+    func show(viewController: UIViewController, model: AlertModel) {
         // Создает алерт(предупреждение)
         let alert = UIAlertController(
             title: model.title,
@@ -21,6 +17,6 @@ final class AlertPresenter: AlertPresenterProtocol {
         // Добавляем кнопку в алерт
         alert.addAction(action)
         // Показываем алерт
-        delegate?.present(alert, animated: true)
+        viewController.present(alert, animated: true)
     }
 }

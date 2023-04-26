@@ -7,10 +7,11 @@ protocol MovieQuizPresenterProtocol {
     func noButtonClicked()
     func yesButtonClicked()
     func didAnswer(isCorrectAnswer: Bool)
-    func showNetworkError(message: String)
     func isLastQuestion() -> Bool
     func restartGame()
     func switchToNextQuestion()
     func convert(model: QuizQuestion)-> QuizStepViewModel
+    func loadDataFromQuestionFactory()
+    func createAlertMessage() -> String
 }
 

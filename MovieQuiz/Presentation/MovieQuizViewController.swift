@@ -36,6 +36,33 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
     }
+    func showResult() {
+        guard let message = presenter?.createAlertMessage() else { return }
+        
+        let viewModel = AlertModel(
+            title: "Этот раунд окончен!",
+            message: message,
+            buttonText: "Сыграть еще раз!") { [weak self] in
+                guard let self = self else { return }
+                presenter?.restartGame()
+            }
+        let alert = AlertPresenter()
+        alert.show(viewController: self, model: viewModel)
+    }
+    
+    // Cоздаем функции показа ошибки с алертом
+    func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        let errorModel = AlertModel(
+            title: "Ошибка",
+            message: "Не удалось загрузить данные",
+            buttonText: "Поробовать еще раз!") { [weak self] in
+                guard let self = self else { return }
+                presenter?.loadDataFromQuestionFactory()
+            }
+        let alert = AlertPresenter()
+        alert.show(viewController: self, model: errorModel)
+    }
     // Реализация функции показа индикатора загрузки
     func showLoadingIndicator() {
         activityIndicator.isHidden = false

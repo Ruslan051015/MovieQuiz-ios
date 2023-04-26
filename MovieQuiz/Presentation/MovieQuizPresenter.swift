@@ -7,7 +7,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, MovieQuizPresenterProto
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private let questionsAmount: Int = 10
-    private var alertPresenter: AlertPresenterProtocol?
     private let statisticService: StatisticService!
     private var currentQuestionIndex: Int = 0
     private weak var viewController: MovieQuizViewControllerProtocol?
@@ -17,7 +16,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, MovieQuizPresenterProto
         statisticService = StatisticServiceImplementation()
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         questionFactory?.loadData()
-        alertPresenter = AlertPresenter(delegate: viewController)
         viewController.showLoadingIndicator()
     }
     // MARK: - QuestionFactoryDelegate
@@ -28,7 +26,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, MovieQuizPresenterProto
     
     func didFailToLoadData(with error: Error) {
         let message = error.localizedDescription
-        showNetworkError(message: message)
+        viewController?.showNetworkError(message: message)
     }
     func didRecieveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
@@ -76,18 +74,9 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, MovieQuizPresenterProto
         viewController?.disableButtons()
     }
     // Реализация функции показа следующего вопроса или результата
-   private func proceedToNextQuestionOrResults() {
+    private func proceedToNextQuestionOrResults() {
         if self.isLastQuestion() {
-            statisticService?.store(correct: correctAnswers,
-                                    total: questionsAmount)
-            let viewModel = AlertModel(
-                title: "Этот раунд окончен!",
-                message: createAlertMessage(),
-                buttonText: "Сыграть еще раз!") { [weak self] in
-                    guard let self = self else { return }
-                    self.restartGame()
-                }
-            alertPresenter?.show(model: viewModel)
+            viewController?.showResult()
         } else {
             self.switchToNextQuestion()
             self.questionFactory?.requestNextQuestion()
@@ -95,7 +84,9 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, MovieQuizPresenterProto
         self.viewController?.enableButtons()
     }
     // Реализация функции формирования сообщения
-    private func createAlertMessage() -> String {
+    func createAlertMessage() -> String {
+        statisticService?.store(correct: correctAnswers,
+                                total: questionsAmount)
         guard let statisticService = statisticService,
               let bestGame = statisticService.bestGame else {
             assertionFailure("Нет сохраненных данных")
@@ -109,22 +100,11 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, MovieQuizPresenterProto
         let resultMessage = [currentGameResultLine, totalGamesCountLine, bestGameInfoLine, averageAccuracyLine].joined(separator: "\n")
         return resultMessage
     }
-    
-    // Cоздаем функции показа ошибки с алертом
-    func showNetworkError(message: String) {
-        viewController?.hideLoadingIndicator()
-        let errorModel = AlertModel(
-            title: "Ошибка",
-            message: "Не удалось загрузить данные",
-            buttonText: "Поробовать еще раз!") { [weak self] in
-                guard let self = self else { return }
-                self.currentQuestionIndex = 0
-                self.correctAnswers = 0
-                self.questionFactory?.loadData()
-            }
-        alertPresenter?.show(model: errorModel)
+    func loadDataFromQuestionFactory() {
+        currentQuestionIndex = 0//
+        correctAnswers = 0//
+        questionFactory?.loadData()
     }
-    
     // Выносим логику изменения свойств в функции
     func isLastQuestion() -> Bool {
         currentQuestionIndex == questionsAmount - 1
