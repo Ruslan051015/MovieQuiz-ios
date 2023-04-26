@@ -71,7 +71,7 @@ final class MovieQuizUITests: XCTestCase {
         XCTAssertTrue(alert.label ==  alertTitle)
         XCTAssertTrue(alert.buttons.firstMatch.label == buttonText)
     }
-    func testAlertDisiss() {
+    func testAlertDisьiss() {
         sleep(2)
         for _ in 1...10 {
             app.buttons["Yes"].tap()
